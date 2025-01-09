@@ -3,6 +3,7 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.application import MIMEApplication
 from email.mime.text import MIMEText
+import time
 
 # Gmail SMTP configuration
 SMTP_SERVER = 'smtp.gmail.com'  # Gmail SMTP server
@@ -52,9 +53,12 @@ def send_email(name, recipient_email, pdf_filename):
             server.login(EMAIL_ADDRESS, EMAIL_PASSWORD)  # Login to Gmail account
             server.sendmail(EMAIL_ADDRESS, recipient_email, msg.as_string())  # Send email
             print(f"Email sent successfully to {recipient_email}")
+            data.loc[data['email'] == recipient_email, 'status'] = 'Success'
     except smtplib.SMTPException as e:
         print(f"Failed to send email to {recipient_email}: {e}")
+        data.loc[data['email'] == recipient_email, 'status'] = 'Failed'
 
 # Loop through each row in the CSV file and send emails
 for index, row in data.iterrows():
     send_email(row['name'], row['email'], row['file_name'])
+    time.sleep(5)  # Delay for 5 seconds between each email
