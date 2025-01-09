@@ -53,12 +53,16 @@ def send_email(name, recipient_email, pdf_filename):
             server.login(EMAIL_ADDRESS, EMAIL_PASSWORD)  # Login to Gmail account
             server.sendmail(EMAIL_ADDRESS, recipient_email, msg.as_string())  # Send email
             print(f"Email sent successfully to {recipient_email}")
-            data.loc[data['email'] == recipient_email, 'status'] = 'Success'
+            return 'Success'
     except smtplib.SMTPException as e:
         print(f"Failed to send email to {recipient_email}: {e}")
-        data.loc[data['email'] == recipient_email, 'status'] = 'Failed'
+        return 'Failed'
 
 # Loop through each row in the CSV file and send emails
 for index, row in data.iterrows():
     send_email(row['name'], row['email'], row['file_name'])
+    # Update the DataFrame
+    data.at[index, 'status'] = status
+    # Save the updated CSV file with email statuses
+    data.to_csv('email_data_updated.csv', index=False)
     time.sleep(5)  # Delay for 5 seconds between each email
